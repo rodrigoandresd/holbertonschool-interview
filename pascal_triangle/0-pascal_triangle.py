@@ -3,6 +3,7 @@
     the Pascal's triangle
 """
 
+
 def pascal_triangle(n):
     """
     Returns the Pascal's triangle of size n as a list of lists.
