@@ -16,7 +16,7 @@ def canUnlockAll(boxes):
         box = queue.pop(0)  # get the next box from the queue
         for key in boxes[box]:  # check all keys in the box
             if key < n and not visited[key]:
-            # make sure the key is valid and not visit
+                # make sure the key is valid and not visit
                 visited[key] = True  # mark the box as visited
                 queue.append(key)
                 # add the box to the queue for further exploration
