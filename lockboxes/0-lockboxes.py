@@ -1,7 +1,13 @@
 #!/usr/bin/python3
+"""
+We have n number of locked boxes in front of us.
+Each box is numbered sequentially from 0 to n - 1
+and each box may contain keys to the other boxes.
+"""
 
 
 def canUnlockAll(boxes):
+    
     n = len(boxes)
     visited = [False] * n  # initially, no boxes are visited
     visited[0] = True  # mark the first box as visited
