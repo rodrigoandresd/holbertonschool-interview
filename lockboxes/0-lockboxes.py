@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+
+
 def canUnlockAll(boxes):
     n = len(boxes)
     visited = [False] * n  # initially, no boxes are visited
