@@ -1,47 +1,60 @@
 #!/usr/bin/python3
 import sys
 from collections import defaultdict
+"""
+Script that reads stdin line by line and computes metrics:
+"""
 
-# Define the allowed status codes
-ALLOWED_STATUS_CODES = [200, 301, 400, 401, 403, 404, 405, 500]
+def print_logs(regist, total_size):
+    """
+    Print logs
+    Args:
+        regist: Dictionary with the count of the status code
+        total_size: Sizes of the file
+    """
+    print("File size: {:d}".format(total_size))
+    for k, v in sorted(regist.items()):
+        if v != 0:
+            print("{:s}: {:d}".format(k, v))
 
-# Initialize variables to keep track of metrics
-total_file_size = 0
-status_code_counts = defaultdict(int)
-line_count = 0
 
-try:
-    # Read input from stdin line by line
-    for line in sys.stdin:
-        # Extract the fields from the input line
-        try:
-            _, _, _, _, _, status_code, file_size = line.split()
-            status_code = int(status_code)
-            file_size = int(file_size)
-        except ValueError:
-            # Skip the line if the fields cannot be extracted properly
-            continue
+def metrics():
+    """
+    Go through logs and print it
+    """
+    REGEX = re.compile((r'[\w\.]+ ?- ?'
+                        r'\[\d{4}(-\d{2}){2}\ \d{2}(:\d{2}){2}\.\d{6}\] ?'
+                        r'\"GET \/projects\/260 HTTP\/1\.1\" ?(\w+) ?(.*)'))
+    regist = {
+        '200': 0, '301': 0, '400': 0, '401': 0,
+        '403': 0, '404': 0, '405': 0, '500': 0
+    }
+    total_size = 0
+    quantity = 0
 
-        # Check if the status code is allowed
-        if status_code in ALLOWED_STATUS_CODES:
-            # Update the total file size
-            total_file_size += file_size
-            # Update the status code count
-            status_code_counts[status_code] += 1
+    try:
+        for line in stdin:
+            regex_result = re.search(REGEX, line)
 
-        line_count += 1
+            if (regex_result):
+                groups = regex_result.groups()
+                if (regist.get(groups[-2], -1) >= 0):
+                    regist[groups[-2]] += 1
 
-        # Print statistics after every 10 lines
-        if line_count % 10 == 0:
-            print("File size: {}".format(total_file_size))
-            for code in sorted(status_code_counts.keys()):
-                print("{}: {}".format(code, status_code_counts[code]))
+                if (re.search(r'^\d+$', groups[-1])):
+                    total_size += int(groups[-1])
 
-except KeyboardInterrupt:
-    # Handle keyboard interruption (CTRL + C)
-    pass
+                quantity += 1
 
-# Print final statistics after keyboard interruption
-print("File size: {}".format(total_file_size))
-for code in sorted(status_code_counts.keys()):
-    print("{}: {}".format(code, status_code_counts[code]))
+            if (quantity % 10 == 0):
+                print_logs(regist, total_size)
+
+        print_logs(regist, total_size)
+
+    except KeyboardInterrupt:
+        print_logs(regist, total_size)
+
+
+if (__name__ == '__main__'):
+    metrics()
+    
