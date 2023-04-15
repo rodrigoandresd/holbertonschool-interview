@@ -1,69 +1,38 @@
 #!/usr/bin/python3
-"""
-Script that reads stdin line by line and computes metrics:
-"""
-
-
 import sys
-from collections import defaultdict
-import re
+import datetime
 
+# Inicializar variables
+total_file_size = 0
+status_code_counts = {}
 
-def print_logs(regist, total_size):
-    """
-    Print logs
-    Args:
-        regist: Dictionary with the count of the status code
-        total_size: Sizes of the file
-    """
-    print("File size: {:d}".format(total_size))
-    for k, v in sorted(regist.items()):
-        if v != 0:
-            print("{:s}: {:d}".format(k, v))
+# Leer stdin línea por línea
+for i, line in enumerate(sys.stdin, 1):
+    # Parsear la línea
+    parts = line.split()
+    if len(parts) != 10:
+        continue  # Saltar líneas que no cumplen con el formato especificado
 
+    ip_address, _, _, date, _, request, status_code, file_size = parts
 
-def metrics():
-    """
-    Go through logs and print it
-    """
-    # Expresión regular para analizar las líneas de logs
-    REGEX = re.compile((r'[\w\.]+ ?- ?'
-                        r'\[\d{4}(-\d{2}){2}\ \d{2}(:\d{2}){2}\.\d{6}\] ?'
-                        r'\"GET \/projects\/260 HTTP\/1\.1\" ?(\w+) ?(.*)'))
-    # Diccionario para almacenar las estadísticas de los códigos de estado
-    regist = {
-        '200': 0, '301': 0, '400': 0, '401': 0,
-        '403': 0, '404': 0, '405': 0, '500': 0
-    }
-    total_size = 0
-    quantity = 0
+    # Actualizar el total del tamaño de archivo
+    total_file_size += int(file_size)
 
-    try:
-        # Leer líneas de logs de la entrada estándar (stdin)
-        for line in sys.stdin:
-            regex_result = re.search(REGEX, line)
+    # Actualizar el contador de códigos de estado
+    if status_code.isdigit():
+        status_code = int(status_code)
+        if status_code in status_code_counts:
+            status_code_counts[status_code] += 1
+        else:
+            status_code_counts[status_code] = 1
 
-            if (regex_result):
-                groups = regex_result.groups()
-                if (regist.get(groups[-2], -1) >= 0):
-                    regist[groups[-2]] += 1
+    # Imprimir estadísticas cada 10 líneas o al interrumpir con CTRL + C
+    if i % 10 == 0:
+        print("File size: {}".format(total_file_size))
+        for status_code in sorted(status_code_counts):
+            print("{}: {}".format(status_code, status_code_counts[status_code]))
 
-                if (re.search(r'^\d+$', groups[-1])):
-                    total_size += int(groups[-1])
-
-                quantity += 1
-
-            # Imprimir las estadísticas cada 10 líneas de logs procesadas
-            if (quantity % 10 == 0):
-                print_logs(regist, total_size)
-
-        # Imprimir las estadísticas al final del procesamiento de logs
-        print_logs(regist, total_size)
-
-    except KeyboardInterrupt:
-        # Manejar la interrupción del teclado y imprimir las estadísticas actuales
-        print_logs(regist, total_size)
-
-
-if (__name__ == '__main__'):
-    metrics()
+# Imprimir estadísticas finales al finalizar la lectura de stdin
+print("File size: {}".format(total_file_size))
+for status_code in sorted(status_code_counts):
+    print("{}: {}".format(status_code, status_code_counts[status_code]))
