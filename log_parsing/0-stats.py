@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 import sys
 from collections import defaultdict
+import re
+
 """
 Script that reads stdin line by line and computes metrics:
 """
@@ -22,9 +24,11 @@ def metrics():
     """
     Go through logs and print it
     """
+    # Expresión regular para analizar las líneas de logs
     REGEX = re.compile((r'[\w\.]+ ?- ?'
                         r'\[\d{4}(-\d{2}){2}\ \d{2}(:\d{2}){2}\.\d{6}\] ?'
                         r'\"GET \/projects\/260 HTTP\/1\.1\" ?(\w+) ?(.*)'))
+    # Diccionario para almacenar las estadísticas de los códigos de estado
     regist = {
         '200': 0, '301': 0, '400': 0, '401': 0,
         '403': 0, '404': 0, '405': 0, '500': 0
@@ -33,7 +37,8 @@ def metrics():
     quantity = 0
 
     try:
-        for line in stdin:
+        # Leer líneas de logs de la entrada estándar (stdin)
+        for line in sys.stdin:
             regex_result = re.search(REGEX, line)
 
             if (regex_result):
@@ -46,15 +51,17 @@ def metrics():
 
                 quantity += 1
 
+            # Imprimir las estadísticas cada 10 líneas de logs procesadas
             if (quantity % 10 == 0):
                 print_logs(regist, total_size)
 
+        # Imprimir las estadísticas al final del procesamiento de logs
         print_logs(regist, total_size)
 
     except KeyboardInterrupt:
+        # Manejar la interrupción del teclado y imprimir las estadísticas actuales
         print_logs(regist, total_size)
 
 
 if (__name__ == '__main__'):
     metrics()
-    
