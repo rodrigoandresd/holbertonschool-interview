@@ -1,11 +1,13 @@
 #!/usr/bin/python3
+"""
+Script that reads stdin line by line and computes metrics:
+"""
+
+
 import sys
 from collections import defaultdict
 import re
 
-"""
-Script that reads stdin line by line and computes metrics:
-"""
 
 def print_logs(regist, total_size):
     """
