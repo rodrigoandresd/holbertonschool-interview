@@ -7,55 +7,54 @@ Write a program that solves the N queens problem.
 from sys import argv
 
 
-def n_queens(size: int) -> list:
-    """
-    N-queens solution
-    Args:
-        size (int): Size of the chessboard
-    Return: List of solutions of N-queens
-    """
+def print_board(board):
+    for row in board:
+        print(row)
 
-    def backtrack(queens: list, xy_dif: list, xy_sum: list) -> None:
-        """
-        Backtracking n-queens algorithms
-        Args:
-            queens (List[int]): List of queens
-            xy_dif (List[int]): List of xy coordinates difference
-            xy_sum (List[int]): List of xy coordinates sum
-        """
-        num_queens = len(queens)
+def is_safe(board, row, col):
+    # Check this row on left side
+    for i in range(col):
+        if board[row][i] == 1:
+            return False
+    # Check upper diagonal on left side
+    for i, j in zip(range(row, -1, -1), range(col, -1, -1)):
+        if board[i][j] == 1:
+            return False
+    # Check lower diagonal on left side
+    for i, j in zip(range(row, N), range(col, -1, -1)):
+        if board[i][j] == 1:
+            return False
+    return True
 
-        if num_queens == size:
-            output.append(queens)
-            return
+def solve(board, col):
+    # base case: all queens are placed
+    if col >= N:
+        print_board(board)
+        print()
+        return True
+    # try to place a queen in each row of the current column
+    for row in range(N):
+        if is_safe(board, row, col):
+            board[row][col] = 1
+            solve(board, col + 1)
+            board[row][col] = 0
+    # if no solution is found
+    return False
 
-        for i in range(size):
-            if ((i not in queens) and ((num_queens - i) not in xy_dif) and
-                    ((num_queens + i) not in xy_sum)):
-                backtrack(queens + [i], xy_dif +
-                          [num_queens - i], xy_sum + [num_queens + i])
-
-    output = []
-
-    backtrack([], [], [])
-
-    return [[[i, j] for i, j in enumerate(solution)] for solution in output]
-
-
-if __name__ == '__main__':
-    if len(argv) != 2:
+if __name__ == "__main__":
+    # parse command-line arguments
+    if len(sys.argv) != 2:
         print("Usage: nqueens N")
-        exit(1)
-
+        sys.exit(1)
     try:
-        number = int(argv[1])
+        N = int(sys.argv[1])
     except ValueError:
         print("N must be a number")
-        exit(1)
-
-    if (number < 4):
+        sys.exit(1)
+    if N < 4:
         print("N must be at least 4")
-        exit(1)
-
-    for results in n_queens(number):
-        print(results)
+        sys.exit(1)
+    # initialize the chessboard
+    board = [[0 for x in range(N)] for y in range(N)]
+    # solve the N queens problem
+    solve(board, 0)
